@@ -1,0 +1,72 @@
+class Node:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+#Ham chen them gia tri
+def insert(root, value):
+    if root is None:
+        return Node(value)
+    if value < root.value:
+        root.left = insert(root.left, value)
+    elif value > root.value:
+        root.right = insert(root.right, value)
+    return root
+
+#Ham duyet inorder
+def inorder(root):
+    if root:
+        inorder(root.left)
+        print(root.value, end=" ")
+        inorder(root.right)
+
+#Tim min Node
+def min_value_node(node):
+    current = node
+    while current.left is not None:
+        current = current.left
+    return current
+
+#Xoa 1 Node co gia tri cho truoc
+def delete_node(root, value):
+    if root is None:
+        return root
+    #Tim node can xoa
+    if value < root.value:
+        root.left = delete_node(root.left, value)
+    elif value > root.value:
+        root.right = delete_node(root.right, value)
+    else:
+        #TH1: Node ko co con hoac chi co 1 con
+        if root.left is None:
+            return root.right
+        elif root.right is None:
+            return root.left
+        # Trường hợp 2: node có 2 con → lấy node nhỏ nhất bên phải thay thế
+        temp = min_value_node(root.right)
+        root.value = temp.value
+        root.right = delete_node(root.right, temp.value)
+    return root
+
+
+#Chương trình 
+data = [50, 30, 70, 20, 40, 60, 80]
+
+root = None
+for value in data:
+    root = insert(root, value)
+print("Kết quả duyệt In-order ban đầu:")
+inorder(root)
+print("\n")
+
+# Xóa node có giá trị 30
+root = delete_node(root, 30)
+
+print("Sau khi xóa node 30, cây duyệt In-order là:")
+inorder(root)
+print()
+
+
+
+
