@@ -1,0 +1,162 @@
+class Movie:
+    def __init__(self, title, genre, year):
+        self.title = title
+        self.genre = genre
+        self.year = year
+
+    def __str__(self):
+        return f"{self.title} ({self.year}) - {self.genre}"
+
+class BSTNode:
+    def __init__(self, key, movie):
+        self.key = key           
+        self.movies = [movie]     
+        self.left = None
+        self.right = None
+
+    def insert(self, key, movie):
+        if key == self.key:
+            self.movies.append(movie)
+        elif key < self.key:
+            if self.left:
+                self.left.insert(key, movie)
+            else:
+                self.left = BSTNode(key, movie)
+        else:
+            if self.right:
+                self.right.insert(key, movie)
+            else:
+                self.right = BSTNode(key, movie)
+
+    def search_exact(self, key):
+        """Tìm theo tên phim chính xác """
+        if key == self.key:
+            return self.movies
+        elif key < self.key and self.left:
+            return self.left.search_exact(key)
+        elif key > self.key and self.right:
+            return self.right.search_exact(key)
+        return []
+
+    def search_prefix(self, prefix, result=None):
+        """Tìm các phim có title bắt đầu bằng prefix."""
+        if result is None:
+            result = []
+        if self.left:
+            self.left.search_prefix(prefix, result)
+        if self.key.startswith(prefix):
+            result.extend(self.movies)
+        if self.right:
+            self.right.search_prefix(prefix, result)
+        return result
+
+    def inorder(self, result=None):
+        """Duyệt cây theo thứ tự alphabet."""
+        if result is None:
+            result = []
+        if self.left:
+            self.left.inorder(result)
+        result.extend(self.movies)
+        if self.right:
+            self.right.inorder(result)
+        return result
+
+def build_structures(movie_list):
+    movies = [Movie(**m) for m in movie_list]
+    hash_index = {}
+    for mv in movies:
+        words = mv.title.lower().split()
+        for w in words:
+            hash_index.setdefault(w, []).append(mv)
+
+    bst_root = None
+    for mv in movies:
+        key = mv.title.lower()
+        if bst_root is None:
+            bst_root = BSTNode(key, mv)
+        else:
+            bst_root.insert(key, mv)
+
+    return movies, hash_index, bst_root
+
+def search_by_keyword(hash_index, keyword):
+    keyword = keyword.lower()
+    return hash_index.get(keyword, [])
+
+def search_by_title(bst_root, title):
+    return bst_root.search_exact(title.lower())
+
+def search_by_prefix(bst_root, prefix):
+    return bst_root.search_prefix(prefix.lower())
+
+def search_by_genre(movies, genre):
+    genre = genre.lower()
+    result = []
+    for mv in movies:
+        if mv.genre.lower() == genre:
+            result.append(mv)
+    return result
+
+def print_movies(movie_list):
+    if not movie_list:
+        print("Không tìm thấy phim nào.")
+    else:
+        for i, mv in enumerate(movie_list, start=1):
+            print(f"{i}. {mv}")
+
+def main():
+    sample_data = [
+        {"title": "Inception",                   "genre": "Sci-Fi",    "year": 2010},
+        {"title": "The Dark Knight",             "genre": "Action",    "year": 2008},
+        {"title": "Interstellar",                "genre": "Sci-Fi",    "year": 2014},
+        {"title": "The Lion King",               "genre": "Animation", "year": 1994},
+        {"title": "High School Musical",         "genre": "Musical",   "year": 2006},
+        {"title": "IT",                          "genre": "Horror",    "year": 2017},
+        {"title": "Avengers Endgame",            "genre": "Action",    "year": 2019},
+        {"title": "Avengers Infinity War",       "genre": "Action",    "year": 2018},
+        {"title": "Spirited Away",               "genre": "Animation", "year": 2001},
+        {"title": "Queen Of Tears",              "genre": "Drama",     "year": 2024},
+        {"title": "Lilo & Stitch",               "genre": "Animation", "year": 2002},
+        {"title": "Bloodhounds",                 "genre": "Action",    "year": 2023},
+        {"title": "The Conjuring",               "genre": "Horror",    "year": 2013},
+    ]
+
+    movies, hash_index, bst_root = build_structures(sample_data)
+
+    while True:
+        print("\n=== MOVIE SEARCH SYSTEM ===")
+        print("1. Tìm phim theo từ khóa")
+        print("2. Tìm phim theo tên đầy đủ")
+        print("3. Tìm phim theo prefix tên")
+        print("4. Tìm phim theo thể loại")
+        print("5. In toàn bộ danh sách phim")
+        print("0. Thoát")
+        choice = input("Chọn chức năng: ")
+
+        if choice == "1":
+            keyword = input("Nhập từ khóa (một từ trong tên phim): ")
+            result = search_by_keyword(hash_index, keyword)
+            print_movies(result)
+        elif choice == "2":
+            title = input("Nhập tên phim đầy đủ: ")
+            result = search_by_title(bst_root, title)
+            print_movies(result)
+        elif choice == "3":
+            prefix = input("Nhập prefix tên phim (ví dụ: 'the', 'avengers'): ")
+            result = search_by_prefix(bst_root, prefix)
+            print_movies(result)
+        elif choice == "4":
+           genre = input("Nhập thể loại (ví dụ: 'Action', 'Sci-Fi', 'Drama'): ")
+           result = search_by_genre(movies, genre)
+           print_movies(result)
+        elif choice == "5":
+            all_movies = bst_root.inorder()
+            print_movies(all_movies)
+        elif choice == "0":
+            print("Good Bye!")
+            break
+        else:
+            print("Lựa chọn không hợp lệ, vui lòng thử lại.")
+
+if __name__ == "__main__":
+    main()
